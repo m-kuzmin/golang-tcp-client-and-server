@@ -30,12 +30,25 @@ func main() {
 	var reader = bufio.NewReader(os.Stdin)
 
 	for {
+		// Read the user input
 		buffer, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// Send the input
 		if _, err = conn.Write([]byte(buffer)); err != nil {
 			log.Fatal(err)
+		}
+
+		// Read the responce and print it
+		response := make([]byte, 1024)
+		len, err := conn.Read(response)
+		if err == nil {
+			response = response[:len]
+			log.Println("Responce:", string(response))
+		} else {
+			log.Println("Error reading responce:", err)
 		}
 	}
 }
