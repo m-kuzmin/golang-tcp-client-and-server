@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"strconv"
 )
 
 const client_msg_buffer = 1024
@@ -43,6 +44,7 @@ func handleConnection(conn net.Conn) {
 	buffer := make([]byte, client_msg_buffer)
 
 	for {
+		// First read the client's message
 		len, err := conn.Read(buffer)
 		if err != nil {
 			log.Println("Error reading from", address, "Reason:", err)
@@ -50,5 +52,14 @@ func handleConnection(conn net.Conn) {
 		}
 		msg := buffer[:len]
 		log.Println("Message from", address, len, "bytes:", string(msg))
+
+		// After the client sent the message respond with some data
+		response := []byte("Received " + strconv.Itoa(len) + " bytes!")
+
+		if _, err := conn.Write(response); err != nil {
+			log.Println("Error sending reponse to", address, "Reason", err)
+		} else {
+			log.Println("Sent responce to the client")
+		}
 	}
 }
