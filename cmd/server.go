@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
+
+const client_msg_buffer = 1024
 
 func main() {
 	var (
@@ -16,13 +17,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Server ready for connections, address:", ln.Addr())
+	log.Println("Server ready for connections, address:", ln.Addr())
 	defer ln.Close()
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Println("Error accepting a connection:", err)
+			log.Println("Error accepting a connection:", err)
+			continue
 		}
 
 		go handleConnection(conn)
@@ -30,7 +32,23 @@ func main() {
 }
 
 func handleConnection(conn net.Conn) {
-	fmt.Println("Got a connection from:", conn.RemoteAddr())
-	defer fmt.Println("Closed the connection")
-	defer conn.Close()
+	address := conn.RemoteAddr()
+
+	log.Println("Got a connection from:", conn.RemoteAddr())
+	defer func() {
+		conn.Close()
+		log.Println("Closed connection to", address)
+	}()
+
+	buffer := make([]byte, client_msg_buffer)
+
+	for {
+		len, err := conn.Read(buffer)
+		if err != nil {
+			log.Println("Error reading from", address, "Reason:", err)
+			return
+		}
+		msg := buffer[:len]
+		log.Println("Message from", address, len, "bytes:", string(msg))
+	}
 }
