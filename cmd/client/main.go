@@ -49,7 +49,7 @@ func main() {
 			response = response[:length]
 			log.Println("Responce:", string(response))
 		} else {
-			log.Println("Error reading responce:", err)
+			log.Fatal("Error reading responce:", err)
 		}
 	}
 }
