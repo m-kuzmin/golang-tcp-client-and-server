@@ -1,3 +1,4 @@
+// Package main contains the client implementation
 package main
 
 import (
@@ -8,7 +9,7 @@ import (
 )
 
 func main() {
-	var (
+	const (
 		address = "localhost"
 		port    = "8080"
 	)

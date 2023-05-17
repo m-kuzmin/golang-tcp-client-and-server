@@ -1,3 +1,4 @@
+// Package main contains the server implementation
 package main
 
 import (
@@ -9,7 +10,7 @@ import (
 const clientMsgBuffer = 1024
 
 func main() {
-	var (
+	const (
 		address = "localhost"
 		port    = "8080"
 	)
@@ -18,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	log.Println("Server ready for connections, address:", ln.Addr())
 	defer ln.Close()
 
