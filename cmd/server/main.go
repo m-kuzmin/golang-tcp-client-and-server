@@ -4,7 +4,11 @@ package main
 import (
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"strconv"
+	"sync"
+	"syscall"
 )
 
 const clientMsgBuffer = 1024
@@ -23,27 +27,55 @@ func main() {
 	log.Println("Server ready for connections, address:", ln.Addr())
 	defer ln.Close()
 
+	var (
+		interruptCh = make(chan os.Signal, 1)
+		quitCh      = make(chan struct{})
+	)
+	signal.Notify(interruptCh, os.Interrupt, syscall.SIGTERM)
+
+	var wg sync.WaitGroup
+
+	go func() {
+		<-interruptCh
+		close(quitCh)
+		ln.Close()
+	}()
+
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Println("Error accepting a connection:", err)
-			continue
+			log.Println("Error, stopping listener:", err)
+			break
 		}
 
-		go handleConnection(conn)
+		wg.Add(1)
+		go handleConnection(conn, &wg, quitCh)
 	}
+
+	wg.Wait()
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, wg *sync.WaitGroup, quitCh <-chan struct{}) {
 	address := conn.RemoteAddr()
-
-	log.Println("Got a connection from:", conn.RemoteAddr())
 	defer func() {
 		conn.Close()
 		log.Println("Closed connection to", address)
+		wg.Done()
 	}()
 
+	log.Println("Got a connection from:", conn.RemoteAddr())
+
 	buffer := make([]byte, clientMsgBuffer)
+
+	go func() {
+		for {
+			_, ok := <-quitCh
+			if !ok {
+				log.Println("Closing connection to", address)
+				conn.Close()
+			}
+		}
+	}()
 
 	for {
 		// First read the client's message
