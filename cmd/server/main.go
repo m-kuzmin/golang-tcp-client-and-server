@@ -73,6 +73,7 @@ func handleConnection(conn net.Conn, wg *sync.WaitGroup, quitCh <-chan struct{})
 			if !ok {
 				log.Println("Closing connection to", address)
 				conn.Close()
+				break
 			}
 		}
 	}()
