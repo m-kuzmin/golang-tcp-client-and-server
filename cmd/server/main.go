@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-const client_msg_buffer = 1024
+const clientMsgBuffer = 1024
 
 func main() {
 	var (
@@ -41,20 +41,20 @@ func handleConnection(conn net.Conn) {
 		log.Println("Closed connection to", address)
 	}()
 
-	buffer := make([]byte, client_msg_buffer)
+	buffer := make([]byte, clientMsgBuffer)
 
 	for {
 		// First read the client's message
-		len, err := conn.Read(buffer)
+		length, err := conn.Read(buffer)
 		if err != nil {
 			log.Println("Error reading from", address, "Reason:", err)
 			return
 		}
-		msg := buffer[:len]
-		log.Println("Message from", address, len, "bytes:", string(msg))
+		msg := buffer[:length]
+		log.Println("Message from", address, length, "bytes:", string(msg))
 
 		// After the client sent the message respond with some data
-		response := []byte("Received " + strconv.Itoa(len) + " bytes!")
+		response := []byte("Received " + strconv.Itoa(length) + " bytes!")
 
 		if _, err := conn.Write(response); err != nil {
 			log.Println("Error sending reponse to", address, "Reason", err)

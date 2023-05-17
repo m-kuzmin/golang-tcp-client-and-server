@@ -43,9 +43,9 @@ func main() {
 
 		// Read the responce and print it
 		response := make([]byte, 1024)
-		len, err := conn.Read(response)
+		length, err := conn.Read(response)
 		if err == nil {
-			response = response[:len]
+			response = response[:length]
 			log.Println("Responce:", string(response))
 		} else {
 			log.Println("Error reading responce:", err)
